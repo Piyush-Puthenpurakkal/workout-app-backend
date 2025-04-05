@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+
 const userSchema = mongoose.Schema(
   {
     email: {
@@ -12,25 +13,25 @@ const userSchema = mongoose.Schema(
       required: true,
     },
   },
-  { timestamp: true }
+  { timestamps: true }
 );
 
-//Static signup function
-userSchema.statics.signup = async (email, password) => {
-  const exists = await User.findOne({ email });
+// Static signup function
+userSchema.statics.signup = async function (email, password) {
+  const exists = await this.findOne({ email });
   if (exists) {
     throw Error("Email already exists!");
   }
 
   const salt = await bcrypt.genSalt(10);
   const hash = await bcrypt.hash(password, salt);
-  const user = await User.create({ email, password: hash });
+  const user = await this.create({ email, password: hash });
   return user;
 };
 
-//Static signup function
-userSchema.statics.login = async (email, password) => {
-  const user = await User.findOne({ email });
+// Static login function
+userSchema.statics.login = async function (email, password) {
+  const user = await this.findOne({ email });
   if (!user) {
     throw Error("Incorrect Email!");
   }
@@ -41,5 +42,6 @@ userSchema.statics.login = async (email, password) => {
 
   return user;
 };
-const User = new mongoose.model("user", userSchema);
+
+const User = mongoose.model("user", userSchema);
 module.exports = User;
